@@ -1,0 +1,1277 @@
+<!DOCTYPE html>
+<html lang="en" class="lenis">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Portfolio of Ganesh Hegde, Senior Creative Designer specializing in Brand Identity, UI/UX, and Packaging Design based in Bengaluru, India.">
+    <meta name="keywords" content="Ganesh Hegde, Creative Designer, Portfolio, UI/UX Design, Branding, Packaging, Graphic Design, Bengaluru">
+    <title>Ganesh Hegde | Senior Creative Designer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- THREE.JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.42/dist/lenis.min.js"></script> 
+    <link href="https://fonts.googleapis.com/css2?family=Italiana&family=Manrope:wght@200;300;400;500;600&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --cursor-size: 20px;
+            --cursor-hover-size: 80px;
+            --bg-color: #0e0e0e;
+            --text-color: #e0e0e0;
+            --accent: #d44c2e; 
+            --surface: #1a1a1a;
+            --ease-out-quint: cubic-bezier(0.23, 1, 0.32, 1);
+            --ease-fluid: cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        html.lenis { height: auto; } 
+        .lenis.lenis-smooth { scroll-behavior: auto; } 
+        .lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; } 
+        .lenis.lenis-stopped { overflow: hidden; } 
+        .lenis.lenis-scrolling iframe { pointer-events: none; } 
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Manrope', sans-serif;
+            cursor: none;
+            overflow-x: hidden;
+        }
+
+        .font-art { font-family: 'Italiana', serif; }
+        
+        .noise-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 9998; opacity: 0.05;
+            background: url('https://grainy-gradients.vercel.app/noise.svg');
+            filter: contrast(170%) brightness(100%);
+        }
+
+        /* --- REFINED PRELOADER --- */
+        #preloader {
+            position: fixed; inset: 0; background: #000; z-index: 10000;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            transition: transform 1.2s var(--ease-out-quint);
+        }
+        #preloader > * {
+            transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+        }
+        .loader-bar { width: 0%; height: 1px; background: var(--accent); transition: width 1.5s ease-in-out; }
+
+        #preloader.loaded > * { opacity: 0; transform: translateY(-20px); }
+        #preloader.loaded { transform: translateY(-100%); transition-delay: 0.4s; }
+
+        /* CURSOR */
+        .cursor-dot, .cursor-outline {
+            position: fixed; top: 0; left: 0; transform: translate(-50%, -50%);
+            border-radius: 50%; z-index: 9999; pointer-events: none;
+        }
+        .cursor-dot { width: var(--cursor-size); height: var(--cursor-size); background-color: white; mix-blend-mode: difference; }
+        .cursor-outline {
+            width: 40px; height: 40px; border: 1px solid rgba(255, 255, 255, 0.5);
+            transition: width 0.2s, height 0.2s, background-color 0.2s, border-color 0.2s;
+        }
+        body.hovering .cursor-outline {
+            width: var(--cursor-hover-size); height: var(--cursor-hover-size);
+            background-color: rgba(212, 76, 46, 0.1); border-color: var(--accent); backdrop-filter: blur(0px);
+        }
+
+        /* MODAL */
+        .project-modal {
+            position: fixed; inset: 0; z-index: 5000;
+            background: rgba(14, 14, 14, 0.95); backdrop-filter: blur(10px);
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; pointer-events: none; transition: opacity 0.4s ease;
+        }
+        .project-modal.active { opacity: 1; pointer-events: auto; }
+        .modal-content {
+            width: 90%; max-width: 1200px; height: 90vh;
+            display: grid; grid-template-columns: 1fr 1fr; gap: 4rem;
+            overflow-y: auto; padding: 2rem;
+        }
+        @media (max-width: 768px) { .modal-content { grid-template-columns: 1fr; gap: 2rem; padding: 1rem; } }
+
+        /* MOBILE MENU */
+        #mobile-menu {
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        #mobile-menu.active {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+        }
+
+        /* MARQUEE */
+        .marquee-container { overflow: hidden; white-space: nowrap; }
+        .marquee-content { display: inline-block; animation: scroll 35s linear infinite; }
+        @keyframes scroll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+
+        /* PROJECT ITEMS */
+        .project-item { border-top: 1px solid rgba(255,255,255,0.1); transition: all 0.6s var(--ease-fluid); cursor: pointer; }
+        .project-item:hover { padding-left: 20px; background-color: rgba(255,255,255,0.03); }
+        @media (min-width: 768px) { .project-item:hover { padding-left: 40px; } }
+        .project-item:hover .project-title { color: var(--accent); font-style: italic; }
+        
+        .hover-image {
+            position: fixed; pointer-events: none; opacity: 0;
+            transform: translate(-50%, -50%) scale(0.8) rotate(-5deg);
+            transition: opacity 0.4s ease, transform 0.6s var(--ease-fluid);
+            z-index: 50; width: 300px; height: auto; aspect-ratio: 4/5;
+            object-fit: cover; border-radius: 4px; filter: grayscale(100%) contrast(120%);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        }
+        @media (min-width: 768px) { .hover-image { width: 400px; } }
+        .project-item:hover ~ .hover-image-container .hover-image.active {
+            opacity: 1; transform: translate(-50%, -50%) scale(1) rotate(0deg); filter: grayscale(0%);
+        }
+
+        /* SERVICES CARDS */
+        .service-card {
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 1.5rem;
+            transition: all 0.4s var(--ease-fluid);
+        }
+        @media (min-width: 768px) { .service-card { padding: 2rem; } }
+        .service-card:hover {
+            border-color: var(--accent);
+            background: rgba(255,255,255,0.02);
+            transform: translateY(-8px);
+        }
+
+        /* --- DYNAMIC GALLERY STYLES --- */
+        .gallery-btn {
+            color: #666; transition: all 0.3s ease; white-space: nowrap;
+        }
+        .gallery-btn.active { color: var(--accent); border-bottom: 1px solid var(--accent); }
+        .gallery-btn:hover { color: #fff; }
+
+        /* MODE 1: MASONRY (Column-wise) - For "All" Category */
+        #gallery-grid.masonry-layout {
+            column-count: 2;
+            column-gap: 1.5rem;
+            width: 100%;
+            display: block;
+        }
+        @media (min-width: 640px) { #gallery-grid.masonry-layout { column-count: 3; } }
+        @media (min-width: 1024px) { #gallery-grid.masonry-layout { column-count: 4; } }
+
+        #gallery-grid.masonry-layout .gallery-item {
+            margin-bottom: 1.5rem;
+            break-inside: avoid;
+            height: auto; /* Natural height */
+        }
+
+        /* MODE 2: GRID (Row-wise) - For Specific Categories */
+        #gallery-grid.grid-layout {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+            width: 100%;
+            align-items: start; /* Align to top */
+        }
+        @media (min-width: 640px) { #gallery-grid.grid-layout { grid-template-columns: repeat(3, 1fr); } }
+        @media (min-width: 1024px) { #gallery-grid.grid-layout { grid-template-columns: repeat(4, 1fr); } }
+
+        #gallery-grid.grid-layout .gallery-item {
+            margin-bottom: 0;
+            height: auto; /* Allow natural height */
+            aspect-ratio: auto; /* No forced square */
+        }
+        
+        #gallery-grid.grid-layout .gallery-item img,
+        #gallery-grid.grid-layout .gallery-item video {
+            height: auto; /* Allow natural height */
+            object-fit: contain; /* Ensure full image visibility */
+        }
+
+        /* Shared Item Styles */
+        .gallery-item { 
+            position: relative;
+            width: 100%;
+            overflow: hidden;
+            border-radius: 4px;
+            background: #f1f1f1;
+            cursor: pointer;
+        }
+        
+        .gallery-item img, 
+        .gallery-item video { 
+            width: 100%; 
+            display: block;
+            opacity: 0;
+            transition: transform 0.6s var(--ease-fluid), opacity 0.5s ease-out;
+        }
+
+        .gallery-item img.loaded,
+        .gallery-item video { opacity: 1; }
+
+        .gallery-item:hover img, 
+        .gallery-item:hover video { 
+            transform: scale(1.05); 
+            filter: brightness(1.1);
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95) translateY(30px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        /* BACK TO TOP */
+        #back-to-top {
+            opacity: 0; visibility: hidden; transition: all 0.4s var(--ease-out-quint);
+            transform: translateY(20px);
+        }
+        #back-to-top.visible {
+            opacity: 1; visibility: visible;
+            transform: translateY(0);
+        }
+
+        /* TIMELINE */
+        .timeline-row { transition: all 0.3s ease; cursor: pointer; }
+        .timeline-details { max-height: 0; overflow: hidden; transition: max-height 0.6s var(--ease-fluid); }
+        .timeline-row.active .timeline-details { max-height: 500px; }
+        .timeline-row:hover .year { color: var(--accent); }
+        .plus-icon { transition: transform 0.4s var(--ease-fluid); }
+        .timeline-row.active .plus-icon { transform: rotate(45deg); }
+
+        .text-outline { -webkit-text-stroke: 1px rgba(255,255,255,0.2); color: transparent; }
+        
+        /* REFINED ENTRANCE ANIMATION */
+        .fade-in-up { 
+            opacity: 0; 
+            transform: translateY(40px); 
+            transition: opacity 1s ease-out, transform 1.2s var(--ease-out-quint); 
+        }
+        .fade-in-up.visible { opacity: 1; transform: translateY(0); }
+
+        /* TEXT REVEAL ANIMATION */
+        .reveal-text span {
+            display: inline-block;
+            opacity: 0;
+            filter: blur(8px);
+            transform: translateY(30px);
+            transition: all 1s var(--ease-fluid);
+        }
+        .reveal-text.visible span {
+            opacity: 1;
+            filter: blur(0);
+            transform: translateY(0);
+        }
+
+        /* RECOGNITION/AWARDS SECTION */
+        .award-row {
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            transition: all 0.4s var(--ease-fluid);
+        }
+        .award-row:hover {
+            padding-left: 20px;
+            border-color: var(--accent);
+            background: linear-gradient(90deg, rgba(212, 76, 46, 0.05) 0%, transparent 100%);
+        }
+        .award-year { font-variant-numeric: tabular-nums; }
+
+        /* PARALLAX IMAGE STRIP */
+        .parallax-strip {
+            background-image: url('assets/ganesh-bg.png');
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: cover;
+            height: 50vh;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 4rem;
+            margin-bottom: 4rem;
+            background-attachment: scroll;
+        }
+        @media (min-width: 768px) {
+            .parallax-strip { height: 60vh; background-attachment: fixed; }
+        }
+        .parallax-overlay {
+            background: rgba(0,0,0,0.5);
+            position: absolute; inset: 0;
+            backdrop-filter: blur(0px);
+        }
+
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
+    </style>
+</head>
+<body>
+
+    <div id="preloader">
+        <h1 class="font-art text-4xl mb-4 text-white">GANESH HEGDE</h1>
+        <div class="w-64 h-[1px] bg-white/10 overflow-hidden">
+            <div class="loader-bar"></div>
+        </div>
+        <p class="text-xs font-mono text-gray-500 mt-2">LOADING PORTFOLIO</p>
+    </div>
+
+    <div class="noise-overlay"></div>
+    <div class="cursor-dot hidden md:block"></div>
+    <div class="cursor-outline hidden md:block"></div>
+
+    <!-- Back to Top Button -->
+    <button id="back-to-top" class="fixed bottom-8 right-8 z-30 p-3 bg-[#d44c2e] text-black rounded-full shadow-lg hover:scale-110 transition-transform cursor-pointer hover-trigger" aria-label="Back to Top">
+        <i data-lucide="arrow-up" class="w-6 h-6"></i>
+    </button>
+
+    <nav class="fixed w-full h-full pointer-events-none z-40 p-6 md:p-8 flex flex-col justify-between mix-blend-difference text-white">
+        <div class="pointer-events-auto flex justify-between items-center w-full">
+            <a href="#" id="dynamic-logo" class="text-xl font-bold tracking-tighter hover-trigger">GH©</a>
+            
+            <!-- Desktop Menu -->
+            <div class="hidden md:flex gap-12 text-xs uppercase tracking-[0.2em]">
+                <a href="#about" class="hover-trigger hover:text-[#d44c2e] transition-colors">Manifesto</a>
+                <a href="#services" class="hover-trigger hover:text-[#d44c2e] transition-colors">Services</a>
+                <a href="#work" class="hover-trigger hover:text-[#d44c2e] transition-colors">Work</a>
+                <a href="#history" class="hover-trigger hover:text-[#d44c2e] transition-colors">Journey</a>
+            </div>
+
+            <!-- Mobile Menu Toggle Button -->
+            <div class="md:hidden pointer-events-auto cursor-pointer p-2 -mr-2 hover-trigger" onclick="toggleMobileMenu()" aria-label="Open Menu">
+                <i data-lucide="menu" class="w-6 h-6"></i>
+            </div>
+        </div>
+        
+        <div class="hidden md:block text-xs uppercase tracking-widest opacity-50 rotate-180" style="writing-mode: vertical-rl;">
+            Bengaluru — India
+        </div>
+    </nav>
+
+    <!-- MOBILE MENU OVERLAY -->
+    <div id="mobile-menu" class="fixed inset-0 bg-[#0e0e0e] z-[60] flex flex-col justify-center items-center opacity-0 invisible pointer-events-none">
+        <div class="absolute top-8 right-6 cursor-pointer text-white p-2 hover-trigger" onclick="toggleMobileMenu()" aria-label="Close Menu">
+            <i data-lucide="x" class="w-8 h-8"></i>
+        </div>
+        <div class="flex flex-col gap-8 text-center">
+            <a href="#about" class="font-art text-4xl text-white hover:text-[#d44c2e] transition-colors" onclick="toggleMobileMenu()">Manifesto</a>
+            <a href="#services" class="font-art text-4xl text-white hover:text-[#d44c2e] transition-colors" onclick="toggleMobileMenu()">Services</a>
+            <a href="#work" class="font-art text-4xl text-white hover:text-[#d44c2e] transition-colors" onclick="toggleMobileMenu()">Work</a>
+            <a href="#history" class="font-art text-4xl text-white hover:text-[#d44c2e] transition-colors" onclick="toggleMobileMenu()">Journey</a>
+        </div>
+    </div>
+
+    <div id="project-modal" class="project-modal">
+        <div class="absolute top-8 right-8 cursor-pointer hover-trigger hover:text-[#d44c2e] transition-colors z-50" onclick="closeModal()" aria-label="Close Modal">
+            <i data-lucide="x" class="w-10 h-10 text-white"></i>
+        </div>
+        <div class="modal-content">
+            <div class="flex flex-col justify-center order-2 md:order-1">
+                <span id="modal-year" class="text-[#d44c2e] font-mono text-sm mb-4">2025</span>
+                <h2 id="modal-title" class="font-art text-5xl md:text-8xl mb-6 leading-none">Project Title</h2>
+                <h3 id="modal-subtitle" class="text-lg md:text-xl text-gray-400 mb-8 font-light">Identity / Branding</h3>
+                <p id="modal-desc" class="text-gray-300 font-light leading-relaxed text-base md:text-lg mb-8">
+                    Description goes here...
+                </p>
+                <button onclick="closeModal(); document.getElementById('archive').scrollIntoView({behavior: 'smooth'})" class="w-fit border-b border-[#d44c2e] pb-1 text-sm uppercase tracking-widest hover:text-[#d44c2e] transition-colors">View All Assets</button>
+            </div>
+            <!-- UPDATED IMAGE CONTAINER -->
+            <div class="flex items-center justify-center bg-[#111] p-2 md:p-4 rounded-lg order-1 md:order-2 h-fit md:h-full w-full">
+                <img id="modal-image" src="" loading="lazy" class="w-full h-auto md:max-h-full md:object-contain rounded shadow-2xl" alt="Project Image">
+            </div>
+        </div>
+    </div>
+
+    <section class="relative min-h-screen flex flex-col justify-center items-center text-center px-4 overflow-hidden" id="hero-section">
+        <!-- 3D BACKGROUND CANVAS -->
+        <div id="canvas-container" class="absolute inset-0 z-0 opacity-70 pointer-events-none"></div>
+        
+        <!-- Background Gradient -->
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[60vw] h-[60vw] bg-gradient-to-tr from-[#1a1a1a] via-[#111] to-black rounded-full shadow-2xl opacity-40 blur-[120px] animate-pulse z-0"></div>
+        
+        <div class="z-10 relative">
+            <p class="text-xs md:text-sm uppercase tracking-[0.4em] mb-6 text-gray-500 fade-in-up">Graphic Designer & 2D Animator</p>
+            <h1 class="font-art text-[14vw] leading-[0.8] mix-blend-overlay opacity-90 fade-in-up hover-trigger cursor-none">GANESH</h1>
+            <h1 class="font-art text-[14vw] leading-[0.8] text-outline fade-in-up" style="transition-delay: 0.2s;">HEGDE</h1>
+            <div class="mt-12 flex flex-col items-center gap-4 fade-in-up" style="transition-delay: 0.4s;">
+                <p class="max-w-md text-sm md:text-base text-gray-400 font-light leading-relaxed px-4">
+                    Bridging Art & Functionality. From <span class="text-white border-b border-[#d44c2e]">Niramaya's</span> digital health to <span class="text-white border-b border-[#d44c2e]">Godrej's</span> vast fields. 
+                </p>
+                <div class="flex gap-4 mt-4">
+                    <a href="#contact" class="px-6 py-2 border border-[#d44c2e] text-[#d44c2e] text-xs uppercase tracking-widest hover:bg-[#d44c2e] hover:text-black transition-all hover-trigger">Hire Me</a>
+                    <a href="#work" class="px-6 py-2 border border-white/20 text-white text-xs uppercase tracking-widest hover:bg-white hover:text-black transition-all hover-trigger">View Work</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="py-12 border-y border-white/10 bg-white/5 backdrop-blur-sm z-20 relative">
+        <div class="max-w-7xl mx-auto px-6 text-center">
+            <p class="text-xs text-gray-500 uppercase tracking-widest mb-8">Trusted by Industry Leaders</p>
+            <div class="flex flex-wrap justify-center gap-8 md:gap-20 opacity-60 grayscale hover:grayscale-0 transition-all duration-500 items-center">
+                <h3 class="font-art text-lg md:text-2xl hover:text-[#d44c2e] cursor-none hover-trigger">Godrej Agrovet</h3>
+                <h3 class="font-art text-lg md:text-2xl hover:text-[#d44c2e] cursor-none hover-trigger">Niramaya Soul</h3>
+                <h3 class="font-art text-lg md:text-2xl hover:text-[#d44c2e] cursor-none hover-trigger">Nuziveedu Seeds</h3>
+                <h3 class="font-art text-lg md:text-2xl hover:text-[#d44c2e] cursor-none hover-trigger">Webisdom</h3>
+                <h3 class="font-art text-lg md:text-2xl hover:text-[#d44c2e] cursor-none hover-trigger">Covana</h3>
+                <h3 class="font-art text-lg md:text-2xl hover:text-[#d44c2e] cursor-none hover-trigger">Rufouss</h3>
+            </div>
+        </div>
+    </div>
+
+    <section id="about" class="py-20 md:py-32 px-6 md:px-20 max-w-7xl mx-auto">
+        <div class="grid md:grid-cols-2 gap-12 md:gap-20 items-start">
+            <div class="md:sticky md:top-32">
+                <h2 class="font-art text-5xl md:text-8xl mb-8 leading-none">The<br>Artist<br><span class="text-[#d44c2e] italic">Within.</span></h2>
+                <div class="w-24 h-[1px] bg-white/30 mb-8"></div>
+                <div class="text-sm font-mono text-gray-400 space-y-2">
+                    <p>BFA (Painting & Sculpture)</p>
+                    <p>Govt. Fine Art College, Dharwad (2014-2018)</p>
+                    <p>Diploma in Animation</p>
+                    <p>Arena Animation, Bangalore (2018-2019)</p>
+                </div>
+            </div>
+            <div class="prose prose-invert prose-lg">
+                <p class="text-xl md:text-2xl font-light text-white leading-relaxed mb-8 md:mb-12">
+                    "Design is not just about aesthetics; it's about solving complex communication problems for industries that matter."
+                </p>
+                <div class="space-y-8 text-gray-400 font-light">
+                    <p>
+                        With a foundation in fine arts and over 5 years of commercial experience, I specialize in two distinct but vital sectors: **Pharmaceuticals** and **Agriculture**. My background in traditional sculpture gives me a unique understanding of form, space, and texture which I translate into digital interfaces and branding.
+                    </p>
+                    
+                    <div class="mt-12 pt-12 border-t border-white/10">
+                        <h4 class="text-xs uppercase tracking-widest text-gray-500 mb-6">Software Proficiency</h4>
+                        <div class="space-y-6">
+                            <div class="group hover-trigger">
+                                <div class="flex justify-between text-xs uppercase mb-2"><span>Adobe Photoshop</span> <span class="text-[#d44c2e]">Expert</span></div>
+                                <div class="w-full h-1 bg-white/10 rounded-full overflow-hidden"><div class="h-full bg-[#d44c2e] w-[95%]"></div></div>
+                            </div>
+                            <div class="group hover-trigger">
+                                <div class="flex justify-between text-xs uppercase mb-2"><span>Adobe Illustrator</span> <span class="text-[#d44c2e]">Expert</span></div>
+                                <div class="w-full h-1 bg-white/10 rounded-full overflow-hidden"><div class="h-full bg-[#d44c2e] w-[90%]"></div></div>
+                            </div>
+                            <div class="group hover-trigger">
+                                <div class="flex justify-between text-xs uppercase mb-2"><span>Figma (UI/UX)</span> <span class="text-[#d44c2e]">Advanced</span></div>
+                                <div class="w-full h-1 bg-white/10 rounded-full overflow-hidden"><div class="h-full bg-[#d44c2e] w-[85%]"></div></div>
+                            </div>
+                            <div class="group hover-trigger">
+                                <div class="flex justify-between text-xs uppercase mb-2"><span>After Effects</span> <span class="text-[#d44c2e]">Advanced</span></div>
+                                <div class="w-full h-1 bg-white/10 rounded-full overflow-hidden"><div class="h-full bg-[#d44c2e] w-[80%]"></div></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- NEW ARTISTIC MANIFESTO SECTION -->
+    <div class="py-20 overflow-hidden border-y border-white/5 bg-[#0a0a0a]">
+        <div class="marquee-container rotate-[-2deg] scale-110">
+            <div class="marquee-content font-art text-[12vw] md:text-[8vw] leading-none text-transparent text-outline opacity-50">
+                DESIGN IS INTELLIGENCE MADE VISIBLE — CHAOS INTO ORDER — FORM FOLLOWS FICTION — 
+                DESIGN IS INTELLIGENCE MADE VISIBLE — CHAOS INTO ORDER — FORM FOLLOWS FICTION — 
+            </div>
+        </div>
+        <div class="marquee-container rotate-[2deg] scale-110 mt-[-4vw]">
+            <div class="marquee-content font-art text-[12vw] md:text-[8vw] leading-none text-[#d44c2e] mix-blend-exclusion" style="animation-direction: reverse;">
+                DIGITAL SCULPTURE — PIXELS & PAINT — CRAFTING EXPERIENCES — 
+                DIGITAL SCULPTURE — PIXELS & PAINT — CRAFTING EXPERIENCES — 
+            </div>
+        </div>
+    </div>
+
+    <section id="services" class="py-20 px-6 md:px-20 max-w-7xl mx-auto border-t border-white/10">
+        <h2 class="font-art text-5xl mb-16 text-center">Design Solutions</h2>
+        <div class="grid md:grid-cols-3 gap-8">
+            <div class="service-card hover-trigger group">
+                <i data-lucide="pen-tool" class="w-8 h-8 text-[#d44c2e] mb-6 group-hover:scale-110 transition-transform"></i>
+                <h3 class="text-2xl font-light mb-4">Brand Identity</h3>
+                <p class="text-sm text-gray-500 leading-relaxed">
+                    Comprehensive logo systems, color palettes, and typography that tell a story. Specialized in Farm Branding and Pharma Trust.
+                </p>
+            </div>
+            <div class="service-card hover-trigger group">
+                <i data-lucide="layout" class="w-8 h-8 text-[#d44c2e] mb-6 group-hover:scale-110 transition-transform"></i>
+                <h3 class="text-2xl font-light mb-4">UI/UX Design</h3>
+                <p class="text-sm text-gray-500 leading-relaxed">
+                    User-centric website layouts, app interfaces (SaaS), and wireframing using Figma. Focus on intuitive navigation and conversion.
+                </p>
+            </div>
+            <div class="service-card hover-trigger group">
+                <i data-lucide="printer" class="w-8 h-8 text-[#d44c2e] mb-6 group-hover:scale-110 transition-transform"></i>
+                <h3 class="text-2xl font-light mb-4">Print & Packaging</h3>
+                <p class="text-sm text-gray-500 leading-relaxed">
+                    High-quality print deliverables including brochures, banners, product packaging (Nutmogri), and marketing signage.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <section class="py-20 px-6 md:px-20 max-w-7xl mx-auto">
+        <div class="flex flex-col md:flex-row gap-12 items-center">
+            <div class="md:w-1/3">
+                <h2 class="font-art text-4xl mb-4">My Process</h2>
+                <p class="text-sm text-gray-500">A structured approach to creativity ensures consistent, high-quality results.</p>
+            </div>
+            <div class="md:w-2/3 grid grid-cols-2 md:grid-cols-4 gap-6">
+                <div class="text-center">
+                    <span class="text-4xl font-art text-white/20 block mb-2">01</span>
+                    <h4 class="text-[#d44c2e]">Discovery</h4>
+                    <p class="text-xs text-gray-600 mt-2">Research & Requirements</p>
+                </div>
+                <div class="text-center">
+                    <span class="text-4xl font-art text-white/20 block mb-2">02</span>
+                    <h4 class="text-[#d44c2e]">Strategy</h4>
+                    <p class="text-xs text-gray-600 mt-2">Concept & Wireframing</p>
+                </div>
+                <div class="text-center">
+                    <span class="text-4xl font-art text-white/20 block mb-2">03</span>
+                    <h4 class="text-[#d44c2e]">Design</h4>
+                    <p class="text-xs text-gray-600 mt-2">Visuals & Iteration</p>
+                </div>
+                <div class="text-center">
+                    <span class="text-4xl font-art text-white/20 block mb-2">04</span>
+                    <h4 class="text-[#d44c2e]">Delivery</h4>
+                    <p class="text-xs text-gray-600 mt-2">Final Assets & Support</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="work" class="py-32 px-4 md:px-20 relative border-t border-white/10">
+        <div class="max-w-7xl mx-auto">
+            <h3 class="text-xs uppercase tracking-[0.3em] mb-16 text-gray-500">Featured Case Studies</h3>
+            <div class="flex flex-col">
+                <!-- Project 1 -->
+                <div class="project-item group py-12 flex flex-col md:flex-row justify-between md:items-center cursor-none hover-trigger gap-4 md:gap-0" 
+                     data-image="assets/projects/niramaya-soul.png" 
+                    onclick="openProject('niramaya')">
+                    <div class="z-10 pointer-events-none">
+                        <h2 class="project-title font-art text-4xl md:text-6xl text-gray-300 transition-colors duration-300">Niramaya Soul</h2>
+                        <p class="text-sm text-gray-500 mt-2 font-mono">E-Pharmacy Identity / Brand System</p>
+                    </div>
+                    <span class="text-gray-600 group-hover:text-white transition-colors text-xl font-light pointer-events-none">2025</span>
+                </div>
+
+                <!-- Project 2 -->
+                <div class="project-item group py-12 flex flex-col md:flex-row justify-between md:items-center cursor-none hover-trigger gap-4 md:gap-0" 
+                     data-image="assets/projects/nutmogri.png" 
+                    onclick="openProject('nutmogri')">
+                    <div class="z-10 pointer-events-none">
+                        <h2 class="project-title font-art text-4xl md:text-6xl text-gray-300 transition-colors duration-300">Nutmogri</h2>
+                        <p class="text-sm text-gray-500 mt-2 font-mono">Packaging / Campaign</p>
+                    </div>
+                    <span class="text-gray-600 group-hover:text-white transition-colors text-xl font-light pointer-events-none">2023</span>
+                </div>
+                
+                <!-- Project 3 -->
+                <div class="project-item group py-12 flex flex-col md:flex-row justify-between md:items-center cursor-none hover-trigger gap-4 md:gap-0" 
+                     data-image="assets/projects/webisdom.png" 
+                    onclick="openProject('webisdom')">
+                    <div class="z-10 pointer-events-none">
+                        <h2 class="project-title font-art text-4xl md:text-6xl text-gray-300 transition-colors duration-300">Webisdom</h2>
+                        <p class="text-sm text-gray-500 mt-2 font-mono">Pharma AI / Medical Infographics</p>
+                    </div>
+                    <span class="text-gray-600 group-hover:text-white transition-colors text-xl font-light pointer-events-none">2024</span>
+                </div>
+
+                <!-- Project 4 -->
+                <div class="project-item group py-12 flex flex-col md:flex-row justify-between md:items-center cursor-none hover-trigger gap-4 md:gap-0" 
+                     data-image="assets/projects/covana.png" 
+                    onclick="openProject('covana')">
+                    <div class="z-10 pointer-events-none">
+                        <h2 class="project-title font-art text-4xl md:text-6xl text-gray-300 transition-colors duration-300">Covana Marketing</h2>
+                        <p class="text-sm text-gray-500 mt-2 font-mono">Godrej & Nuziveedu Campaigns</p>
+                    </div>
+                    <span class="text-gray-600 group-hover:text-white transition-colors text-xl font-light pointer-events-none">2024</span>
+                </div>
+
+                <!-- Project 5 -->
+                <div class="project-item group py-12 flex flex-col md:flex-row justify-between md:items-center cursor-none hover-trigger gap-4 md:gap-0" 
+                     data-image="assets/projects/bixbytes.png" 
+                    onclick="openProject('bixbytes')">
+                    <div class="z-10 pointer-events-none">
+                        <h2 class="project-title font-art text-4xl md:text-6xl text-gray-300 transition-colors duration-300">Bixbytes Solutions</h2>
+                        <p class="text-sm text-gray-500 mt-2 font-mono">SaaS UI/UX / Marketing Collateral</p>
+                    </div>
+                    <span class="text-gray-600 group-hover:text-white transition-colors text-xl font-light pointer-events-none">2023</span>
+                </div>
+
+                <!-- Project 6 -->
+                <div class="project-item group py-12 flex flex-col md:flex-row justify-between md:items-center cursor-none hover-trigger gap-4 md:gap-0" 
+                     data-image="assets/projects/octech.png" 
+                    onclick="openProject('octech')">
+                    <div class="z-10 pointer-events-none">
+                        <h2 class="project-title font-art text-4xl md:text-6xl text-gray-300 transition-colors duration-300">Octech Digital</h2>
+                        <p class="text-sm text-gray-500 mt-2 font-mono">Wireframing / App Prototyping</p>
+                    </div>
+                    <span class="text-gray-600 group-hover:text-white transition-colors text-xl font-light pointer-events-none">2021</span>
+                </div>
+
+                <!-- Project 7 -->
+                <div class="project-item group py-12 flex flex-col md:flex-row justify-between md:items-center cursor-none hover-trigger gap-4 md:gap-0" 
+                     data-image="assets/projects/rufouss.png" 
+                    onclick="openProject('rufouss')">
+                    <div class="z-10 pointer-events-none">
+                        <h2 class="project-title font-art text-4xl md:text-6xl text-gray-300 transition-colors duration-300">Rufouss ERP</h2>
+                        <p class="text-sm text-gray-500 mt-2 font-mono">Corporate Identity / Rebranding</p>
+                    </div>
+                    <span class="text-gray-600 group-hover:text-white transition-colors text-xl font-light pointer-events-none">2020</span>
+                </div>
+
+                <!-- Project 8 -->
+                <div class="project-item group py-12 flex flex-col md:flex-row justify-between md:items-center cursor-none hover-trigger gap-4 md:gap-0" 
+                     data-image="assets/projects/printo.png" 
+                    onclick="openProject('printo')">
+                    <div class="z-10 pointer-events-none">
+                        <h2 class="project-title font-art text-4xl md:text-6xl text-gray-300 transition-colors duration-300">Printo</h2>
+                        <p class="text-sm text-gray-500 mt-2 font-mono">Print Design / Signage</p>
+                    </div>
+                    <span class="text-gray-600 group-hover:text-white transition-colors text-xl font-light pointer-events-none">2019</span>
+                </div>
+            </div>
+            <div class="hover-image-container fixed top-0 left-0 w-full h-full pointer-events-none z-0">
+                <img src="" alt="Project Preview" class="hover-image" id="cursor-image">
+            </div>
+        </div>
+    </section>
+
+    <section id="archive" class="py-20 px-6 md:px-20 bg-[#0c0c0c] min-h-screen">
+        <div class="max-w-7xl mx-auto">
+            <div class="flex flex-col md:flex-row justify-between md:items-end mb-12 md:mb-16">
+                <h2 class="font-art text-5xl md:text-7xl mb-6 md:mb-0">Creative<br>Archive.</h2>
+                <div class="w-full md:w-auto overflow-x-auto pb-2 scrollbar-hide">
+                    <div class="flex gap-6 text-xs uppercase tracking-widest whitespace-nowrap min-w-max md:min-w-0 px-1">
+                        <button class="gallery-btn hover-trigger" onclick="loadCategory('social-media-post', this)" aria-label="Load Social Media Posts">Socials</button>
+                        <button class="gallery-btn hover-trigger" onclick="loadCategory('uiux', this)" aria-label="Load UI/UX Projects">UI/UX</button>
+                        <button class="gallery-btn hover-trigger" onclick="loadCategory('web', this)" aria-label="Load Web Projects">Web</button>
+                        <button class="gallery-btn hover-trigger" onclick="loadCategory('logos', this)" aria-label="Load Logo Designs">Logos</button>
+                        <button class="gallery-btn hover-trigger" onclick="loadCategory('icons', this)" aria-label="Load Icon Designs">Icons</button>
+                        <button class="gallery-btn hover-trigger" onclick="loadCategory('tattoo', this)" aria-label="Load Tattoo Designs">Tattoo</button>
+                        <button class="gallery-btn hover-trigger" onclick="loadCategory('reels', this)" aria-label="Load Reels">Reels</button>
+                        <button class="gallery-btn hover-trigger" onclick="loadCategory('animations', this)" aria-label="Load Animation Videos">Animations</button>
+                        <button class="gallery-btn active hover-trigger" onclick="loadCategory('all', this)" aria-label="Load All Projects">All</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MASONRY CONTAINER -->
+            <div id="gallery-grid"></div>
+            
+            <div id="load-more-container" class="w-full justify-center mt-12 hidden">
+                <button class="px-8 py-3 border border-[#d44c2e] text-[#d44c2e] hover:bg-[#d44c2e] hover:text-black transition-all uppercase tracking-widest text-xs font-bold" aria-label="Load More Work">Load More Work</button>
+            </div>
+        </div>
+    </section>
+
+    <section id="history" class="py-32 px-6 md:px-20 max-w-7xl mx-auto bg-[#0a0a0a] overflow-hidden">
+        <div class="flex flex-col md:flex-row justify-between items-baseline mb-24">
+            <h2 class="font-art text-5xl md:text-7xl">The Path.</h2>
+            <p class="text-gray-500 mt-4 md:mt-0 max-w-sm text-right">From traditional art in Dharwad to digital solutions in Bangalore & Beyond.</p>
+        </div>
+
+        <div class="relative">
+            <!-- Center Line (Desktop) / Left Line (Mobile) -->
+            <div class="absolute left-4 md:left-1/2 top-0 bottom-0 w-[1px] bg-gradient-to-b from-[#d44c2e] via-white/20 to-transparent md:-translate-x-1/2"></div>
+
+            <!-- Item 1 (Right) -->
+            <div class="relative z-10 mb-24 md:w-1/2 md:ml-auto md:pl-24 pl-16 group">
+                <!-- Node -->
+                <div class="absolute left-[11px] md:left-[-6px] top-2 w-3 h-3 bg-[#0a0a0a] border border-[#d44c2e] rotate-45 group-hover:bg-[#d44c2e] group-hover:scale-150 transition-all duration-500 shadow-[0_0_15px_rgba(212,76,46,0.5)]"></div>
+                
+                <!-- Background Year Art -->
+                <span class="font-art text-[5rem] md:text-[8rem] leading-none text-white/5 absolute -top-10 -left-6 md:-top-16 md:-left-[4rem] z-0 pointer-events-none group-hover:text-white/10 transition-colors duration-500 select-none">25</span>
+                
+                <div class="relative z-10">
+                    <span class="text-[#d44c2e] text-xs font-mono uppercase tracking-widest mb-3 block">Present</span>
+                    <h3 class="text-3xl md:text-4xl text-white font-light mb-2 group-hover:text-[#d44c2e] transition-colors">Graphic Designer</h3>
+                    <h4 class="font-art text-xl md:text-2xl text-gray-300 mb-4 italic">Niramaya Soul</h4>
+                    <p class="text-gray-500 font-light text-sm leading-relaxed max-w-sm">
+                        Built a cohesive e-pharmacy brand identity across digital and print, enhancing trust. Created user-focused marketing and UI designs aligned with healthcare standards.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Item 2 (Left) -->
+            <div class="relative z-10 mb-24 md:w-1/2 md:mr-auto md:text-right md:pr-24 pl-16 md:pl-0 group">
+                <!-- Node -->
+                <div class="absolute left-[11px] md:right-[-6px] md:left-auto top-2 w-3 h-3 bg-[#0a0a0a] border border-white/30 rotate-45 group-hover:border-[#d44c2e] group-hover:bg-[#d44c2e] group-hover:scale-150 transition-all duration-500"></div>
+                
+                <!-- Background Year Art -->
+                <span class="font-art text-[5rem] md:text-[8rem] leading-none text-white/5 absolute -top-10 -left-6 md:left-auto md:-right-[4rem] z-0 pointer-events-none group-hover:text-white/10 transition-colors duration-500 select-none">24</span>
+
+                <div class="relative z-10">
+                    <span class="text-gray-500 text-xs font-mono uppercase tracking-widest mb-3 block">2024 — 2025</span>
+                    <h3 class="text-3xl md:text-4xl text-white font-light mb-2 group-hover:text-[#d44c2e] transition-colors">Creative Designer</h3>
+                    <h4 class="font-art text-xl md:text-2xl text-gray-300 mb-4 italic">Webisdom & Covana</h4>
+                    <p class="text-gray-500 font-light text-sm leading-relaxed max-w-sm md:ml-auto">
+                       Webisdom: Designed futuristic content for pharma brands and AI startups.
+                       <br>Covana: Created agriculture-themed visuals, farm branding for Godrej Agrovet.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Item 3 (Right) -->
+            <div class="relative z-10 mb-24 md:w-1/2 md:ml-auto md:pl-24 pl-16 group">
+                <div class="absolute left-[11px] md:left-[-6px] top-2 w-3 h-3 bg-[#0a0a0a] border border-white/30 rotate-45 group-hover:border-[#d44c2e] group-hover:bg-[#d44c2e] group-hover:scale-150 transition-all duration-500"></div>
+                <span class="font-art text-[5rem] md:text-[8rem] leading-none text-white/5 absolute -top-10 -left-6 md:-top-16 md:-left-[4rem] z-0 pointer-events-none group-hover:text-white/10 transition-colors duration-500 select-none">23</span>
+                
+                <div class="relative z-10">
+                    <span class="text-gray-500 text-xs font-mono uppercase tracking-widest mb-3 block">2023 — 2024</span>
+                    <h3 class="text-3xl md:text-4xl text-white font-light mb-2 group-hover:text-[#d44c2e] transition-colors">UI/UX Designer</h3>
+                    <h4 class="font-art text-xl md:text-2xl text-gray-300 mb-4 italic">Bixbytes Solutions</h4>
+                    <p class="text-gray-500 font-light text-sm leading-relaxed max-w-sm">
+                        Worked on SaaS interfaces, website layouts, and wireframing using Figma. Developed animations for concepts and marketing brochures.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Item 4 (Left) -->
+            <div class="relative z-10 mb-24 md:w-1/2 md:mr-auto md:text-right md:pr-24 pl-16 md:pl-0 group">
+                <div class="absolute left-[11px] md:right-[-6px] md:left-auto top-2 w-3 h-3 bg-[#0a0a0a] border border-white/30 rotate-45 group-hover:border-[#d44c2e] group-hover:bg-[#d44c2e] group-hover:scale-150 transition-all duration-500"></div>
+                <span class="font-art text-[5rem] md:text-[8rem] leading-none text-white/5 absolute -top-10 -left-6 md:left-auto md:-right-[4rem] z-0 pointer-events-none group-hover:text-white/10 transition-colors duration-500 select-none">21</span>
+
+                <div class="relative z-10">
+                    <span class="text-gray-500 text-xs font-mono uppercase tracking-widest mb-3 block">2021 — 2023</span>
+                    <h3 class="text-3xl md:text-4xl text-white font-light mb-2 group-hover:text-[#d44c2e] transition-colors">Associate Designer</h3>
+                    <h4 class="font-art text-xl md:text-2xl text-gray-300 mb-4 italic">Octech Digital</h4>
+                    <p class="text-gray-500 font-light text-sm leading-relaxed max-w-sm md:ml-auto">
+                        Used wireframes, mock-ups and prototypes to establish user interface standards. Collaborated with design teams to create intuitive software solutions.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Item 5 (Right) -->
+            <div class="relative z-10 mb-24 md:w-1/2 md:ml-auto md:pl-24 pl-16 group">
+                <div class="absolute left-[11px] md:left-[-6px] top-2 w-3 h-3 bg-[#0a0a0a] border border-white/30 rotate-45 group-hover:border-[#d44c2e] group-hover:bg-[#d44c2e] group-hover:scale-150 transition-all duration-500"></div>
+                <span class="font-art text-[5rem] md:text-[8rem] leading-none text-white/5 absolute -top-10 -left-6 md:-top-16 md:-left-[4rem] z-0 pointer-events-none group-hover:text-white/10 transition-colors duration-500 select-none">20</span>
+                
+                <div class="relative z-10">
+                    <span class="text-gray-500 text-xs font-mono uppercase tracking-widest mb-3 block">2020 — 2021</span>
+                    <h3 class="text-3xl md:text-4xl text-white font-light mb-2 group-hover:text-[#d44c2e] transition-colors">Graphic Designer</h3>
+                    <h4 class="font-art text-xl md:text-2xl text-gray-300 mb-4 italic">Rufouss</h4>
+                    <p class="text-gray-500 font-light text-sm leading-relaxed max-w-sm">
+                        Developed creative designs for diverse client requirements including comprehensive rebranding. Delivered visual identity assets.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Item 6 (Left) -->
+            <div class="relative z-10 md:w-1/2 md:mr-auto md:text-right md:pr-24 pl-16 md:pl-0 group">
+                <div class="absolute left-[11px] md:right-[-6px] md:left-auto top-2 w-3 h-3 bg-[#0a0a0a] border border-white/30 rotate-45 group-hover:border-[#d44c2e] group-hover:bg-[#d44c2e] group-hover:scale-150 transition-all duration-500"></div>
+                <span class="font-art text-[5rem] md:text-[8rem] leading-none text-white/5 absolute -top-10 -left-6 md:left-auto md:-right-[4rem] z-0 pointer-events-none group-hover:text-white/10 transition-colors duration-500 select-none">19</span>
+
+                <div class="relative z-10">
+                    <span class="text-gray-500 text-xs font-mono uppercase tracking-widest mb-3 block">2019 — 2020</span>
+                    <h3 class="text-3xl md:text-4xl text-white font-light mb-2 group-hover:text-[#d44c2e] transition-colors">Graphic Designer</h3>
+                    <h4 class="font-art text-xl md:text-2xl text-gray-300 mb-4 italic">Printo</h4>
+                    <p class="text-gray-500 font-light text-sm leading-relaxed max-w-sm md:ml-auto">
+                        Worked with clients to gather requirements and manage project milestones. Developed creative designs for print materials and signage.
+                    </p>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- NEW PARALLAX INTERLUDE -->
+    <div class="parallax-strip">
+        <div class="parallax-overlay"></div>
+        <div class="z-10 text-center mix-blend-difference">
+            <p class="text-xs uppercase tracking-[0.5em] mb-4 text-white">Philosophy</p>
+            <h2 class="font-art text-4xl md:text-6xl text-white leading-tight reveal-text" id="philosophy-text">
+                "Art is not what you see,<br>but what you make others see."
+            </h2>
+            <p class="mt-4 text-sm font-mono text-gray-300">— Edgar Degas</p>
+        </div>
+    </div>
+
+    <footer id="contact" class="min-h-[80vh] flex flex-col justify-between px-6 py-20 bg-[#d44c2e] text-black">
+        <div>
+            <p class="text-black/60 uppercase tracking-widest text-sm mb-4">Open for commissions</p>
+            <h2 class="font-art text-[12vw] leading-[0.8] hover-trigger cursor-none">LET'S<br>TALK.</h2>
+        </div>
+        <div class="flex flex-col md:flex-row justify-between items-end border-t border-black/20 pt-12">
+            <div class="flex flex-col gap-2 mb-8 md:mb-0">
+                <a href="mailto:ganeshhegde806@gmail.com" class="text-2xl font-bold hover:underline hover-trigger cursor-none" aria-label="Send Email">ganeshhegde806@gmail.com</a>
+                <p class="text-black/60 font-mono text-sm">Balaji krupa appartment, Near Basaveshwara Nagar Yelahanka, Nehru Nagar, Bengaluru, Karnataka 560064</p>
+                <p class="text-black/60 font-mono text-sm">+91 9481924275, +91 8792847661</p>
+            </div>
+            <div class="flex gap-8 text-sm font-bold uppercase tracking-widest">
+                <a href="#" class="hover:text-white transition-colors hover-trigger cursor-none" aria-label="LinkedIn Profile">LinkedIn</a>
+                <a href="#" class="hover:text-white transition-colors hover-trigger cursor-none" aria-label="Behance Profile">Behance</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        lucide.createIcons();
+
+        // DYNAMIC LOGO YEAR
+        const logo = document.getElementById('dynamic-logo');
+        if(logo) logo.innerText = `GH©${new Date().getFullYear()}`;
+
+        // THREE.JS BACKGROUND
+        function initThreeJS() {
+            const container = document.getElementById('canvas-container');
+            if (!container) return;
+
+            // Scene setup
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+            
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // Performance optimization
+            container.appendChild(renderer.domElement);
+
+            // Create Particles
+            const particlesGeometry = new THREE.BufferGeometry();
+            const counts = 1500;
+            const positions = new Float32Array(counts * 3);
+
+            for(let i = 0; i < counts * 3; i++) {
+                positions[i] = (Math.random() - 0.5) * 12; // Spread across space
+            }
+
+            particlesGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+
+            // Material - Accent Color dots
+            const particlesMaterial = new THREE.PointsMaterial({
+                size: 0.015,
+                color: 0xd44c2e,
+                transparent: true,
+                opacity: 0.8,
+                sizeAttenuation: true
+            });
+
+            // Create Mesh
+            const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
+            scene.add(particlesMesh);
+
+            // Add some floating shapes for "Small Arts" feel
+            const group = new THREE.Group();
+            const geo1 = new THREE.IcosahedronGeometry(0.5, 0);
+            const mat1 = new THREE.MeshBasicMaterial({ color: 0xffffff, wireframe: true, transparent: true, opacity: 0.1 });
+            const shape1 = new THREE.Mesh(geo1, mat1);
+            shape1.position.set(2, 1, -1);
+            group.add(shape1);
+
+            const geo2 = new THREE.TetrahedronGeometry(0.3, 0);
+            const shape2 = new THREE.Mesh(geo2, mat1);
+            shape2.position.set(-2, -1, -1);
+            group.add(shape2);
+            
+            scene.add(group);
+
+            camera.position.z = 3;
+
+            // Mouse Interaction Variables
+            let mouseX = 0;
+            let mouseY = 0;
+            let targetX = 0;
+            let targetY = 0;
+
+            const windowHalfX = window.innerWidth / 2;
+            const windowHalfY = window.innerHeight / 2;
+
+            function onDocumentMouseMove(event) {
+                mouseX = (event.clientX - windowHalfX);
+                mouseY = (event.clientY - windowHalfY);
+            }
+            document.addEventListener('mousemove', onDocumentMouseMove);
+
+            // Animation Loop
+            const clock = new THREE.Clock();
+
+            function animate() {
+                requestAnimationFrame(animate);
+                
+                const elapsedTime = clock.getElapsedTime();
+
+                // Smooth Mouse Follow
+                targetX = mouseX * 0.0005;
+                targetY = mouseY * 0.0005;
+
+                particlesMesh.rotation.y += 0.02 * (targetX - particlesMesh.rotation.y);
+                particlesMesh.rotation.x += 0.02 * (targetY - particlesMesh.rotation.x);
+                
+                // Constant gentle float
+                particlesMesh.rotation.z = elapsedTime * 0.03;
+                
+                // Rotate extra shapes
+                shape1.rotation.x += 0.002;
+                shape1.rotation.y += 0.002;
+                shape2.rotation.x -= 0.002;
+                shape2.rotation.y -= 0.002;
+
+                renderer.render(scene, camera);
+            }
+
+            animate();
+
+            // Handle Resize
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+        }
+
+        // PRELOADER & INIT
+        window.addEventListener('load', () => {
+            const preloader = document.getElementById('preloader');
+            const bar = document.querySelector('.loader-bar');
+            if (bar) bar.style.width = '100%';
+            
+            // Initialize 3D Background
+            initThreeJS();
+
+            // Wait for bar to fill, then trigger exit sequence
+            setTimeout(() => { 
+                if(preloader) preloader.classList.add('loaded'); 
+            }, 1000);
+            
+            // LOAD DEFAULT CATEGORY (ALL) ON PAGE LOAD
+            const activeBtn = document.querySelector('.gallery-btn.active');
+            if(activeBtn) loadCategory('all', activeBtn);
+        });
+
+        // MOBILE MENU TOGGLE
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            if(menu) {
+                menu.classList.toggle('active');
+                // Toggle body scroll
+                if(menu.classList.contains('active')) {
+                    document.body.style.overflow = 'hidden';
+                } else {
+                    document.body.style.overflow = '';
+                }
+            }
+        }
+
+        // LENIS SCROLL
+        if (typeof Lenis !== 'undefined') {
+            const lenis = new Lenis({
+                duration: 1.2, easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+                direction: 'vertical', smooth: true,
+            });
+            function raf(time) { lenis.raf(time); requestAnimationFrame(raf); }
+            requestAnimationFrame(raf);
+        }
+
+        // CURSOR
+        const cursorDot = document.querySelector('.cursor-dot');
+        const cursorOutline = document.querySelector('.cursor-outline');
+        const hoverTriggers = document.querySelectorAll('.hover-trigger');
+
+        if(cursorDot && cursorOutline) {
+            window.addEventListener('mousemove', (e) => {
+                const posX = e.clientX; const posY = e.clientY;
+                cursorDot.style.left = `${posX}px`; cursorDot.style.top = `${posY}px`;
+                cursorOutline.animate({ left: `${posX}px`, top: `${posY}px` }, { duration: 500, fill: "forwards" });
+                
+                const activeImage = document.querySelector('.hover-image.active');
+                if(activeImage) { activeImage.style.left = `${posX}px`; activeImage.style.top = `${posY}px`; }
+            });
+        }
+
+        function attachHoverListeners() {
+            document.querySelectorAll('.gallery-item').forEach(trigger => { 
+                 trigger.addEventListener('mouseenter', () => document.body.classList.add('hovering')); 
+                 trigger.addEventListener('mouseleave', () => document.body.classList.remove('hovering'));
+            });
+        }
+        
+        hoverTriggers.forEach(trigger => {
+            trigger.addEventListener('mouseenter', () => document.body.classList.add('hovering'));
+            trigger.addEventListener('mouseleave', () => document.body.classList.remove('hovering'));
+        });
+
+        // PROJECT IMAGE HOVER
+        const projectItems = document.querySelectorAll('.project-item');
+        const cursorImage = document.getElementById('cursor-image');
+
+        projectItems.forEach(item => {
+            item.addEventListener('mouseenter', () => {
+                const imageUrl = item.getAttribute('data-image');
+                if(cursorImage) {
+                    cursorImage.src = imageUrl; 
+                    cursorImage.classList.add('active');
+                }
+            });
+            item.addEventListener('mouseleave', () => { 
+                if(cursorImage) cursorImage.classList.remove('active'); 
+            });
+        });
+
+        function toggleAccordion(element) {
+            document.querySelectorAll('.timeline-row').forEach(row => { if (row !== element) row.classList.remove('active'); });
+            element.classList.toggle('active');
+        }
+
+        // BACK TO TOP LOGIC
+        const backToTopBtn = document.getElementById('back-to-top');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 500) {
+                backToTopBtn.classList.add('visible');
+            } else {
+                backToTopBtn.classList.remove('visible');
+            }
+        });
+        backToTopBtn.addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+
+        // --- PROJECT MODAL LOGIC ---
+        const projectData = {
+            'niramaya': {
+                title: "Niramaya Soul",
+                year: "2025",
+                subtitle: "E-Pharmacy Identity / Brand System",
+                desc: "Pharmaceutical Manufacturing. Built a cohesive e-pharmacy brand identity across digital and print, enhancing trust and visual clarity. Created user-focused marketing and UI designs aligned with healthcare standards and brand consistency.",
+                image: "assets/projects/niramaya-soul.png"
+            },
+            'webisdom': {
+                title: "Webisdom",
+                year: "2024-2025",
+                subtitle: "Pharma AI & Marketing",
+                desc: "Designed futuristic, tech-inspired content for AI startups and medical firms. Specialized in AI-driven pharma visuals, medical infographics, and healthcare marketing materials. Created motion graphics and UI/UX elements for social media campaigns.",
+                image: "assets/projects/webisdom.png"
+            },
+            'covana': {
+                title: "Covana Marketing",
+                year: "2024",
+                subtitle: "Agri-Tech & Farm Branding",
+                desc: "Creative Designer for Agriculture-themed visuals. Worked with major clients like Godrej Agrovet and Nuziveedu Seeds to design farm branding, product promotions, and awareness campaigns. Created engaging social media content using typography and color theory.",
+                image: "assets/projects/covana.png"
+            },
+            'nutmogri': {
+                title: "Nutmogri",
+                year: "2023",
+                subtitle: "Premium Cashews / Packaging",
+                desc: "Packaging and visual identity for a premium dry fruit brand. The design focuses on earth tones and organic textures to highlight the natural quality of the product. Scope included pouch packaging design, box layout, and promotional social media campaigns.",
+                image: "assets/projects/nutmogri.png"
+            },
+            'bixbytes': {
+                title: "Bixbytes Solutions",
+                year: "2023-2024",
+                subtitle: "SaaS UI/UX Design",
+                desc: "Collaborated with business analysts to design intuitive software interfaces and website layouts. Created wireframes, templates, and high-fidelity mockups. Developed animations for concepts and designed brochures/flyers for media marketing.",
+                image: "assets/projects/bixbytes.png"
+            },
+            'octech': {
+                title: "Octech Digital",
+                year: "2021-2023",
+                subtitle: "Associate Design / Prototyping",
+                desc: "Responsible for creation of online design and layout using wireframes, mock-ups, and prototypes to establish user interface standards. Worked with design teams to create intuitive and easy-to-use software solutions.",
+                image: "assets/projects/octech.png"
+            },
+            'rufouss': {
+                title: "Rufouss",
+                year: "2020-2021",
+                subtitle: "Corporate Identity",
+                desc: "Developed creative designs for diverse client requirements including comprehensive rebranding. Delivered visual identity assets and marketing packages designed to strengthen business competence.",
+                image: "assets/projects/rufouss.png"
+            },
+            'printo': {
+                title: "Printo",
+                year: "2019-2020",
+                subtitle: "Print Design & Production",
+                desc: "Managed end-to-end design for print materials. Created banners, signage, and marketing collateral. Worked directly with clients to gather requirements, establish scopes, and manage project milestones.",
+                image: "assets/projects/printo.png"
+            }
+        };
+
+        function openProject(key) {
+            const data = projectData[key];
+            if(!data) return;
+
+            document.getElementById('modal-year').innerText = data.year;
+            document.getElementById('modal-title').innerText = data.title;
+            document.getElementById('modal-subtitle').innerText = data.subtitle;
+            document.getElementById('modal-desc').innerText = data.desc;
+            document.getElementById('modal-image').src = data.image;
+
+            document.getElementById('project-modal').classList.add('active');
+            document.body.style.overflow = 'hidden'; // Stop scrolling
+        }
+
+        function closeModal() {
+            document.getElementById('project-modal').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        // --- DYNAMIC MASONRY GALLERY LOGIC ---
+        const galleryGrid = document.getElementById('gallery-grid');
+        
+        const galleryData = {
+            'social-media-post': { count: 23, path: 'assets/social-media-post/', ext: 'png' },
+            'uiux': { 
+                type: 'custom',
+                path: 'assets/ui-ux/', 
+                data: [
+                    'chatboat-tang-1.jpg', 'chatboat-tang-2.jpg', 'chatboat-tang-3.jpg', 
+                    'chatboat-tang-4.jpg', 'chatboat-tang-5.jpg', 'chatboat-tang-6.jpg',
+                    'cricket-ar-filter-1.png', 'cricket-ar-filter-2.png', 'cricket-ar-filter-3.png',
+                    'cricket-ar-filter-7.png', 'cricket-ar-filter-8.png', 'cricket-ar-filter-9.png',
+                    'cricket-ar-filter-10.png', 'cricket-ar-filter-11.png', 'cricket-ar-filter-12.png',
+                    'itc-bingo-amazon-prime-promo-01.png', 'itc-bingo-amazon-prime-promo-02.png',
+                    'max-west-voucher-01.jpg'
+                ]
+            },
+            'web': { count: 15, path: 'assets/web/', prefix: 'web-banner-', ext: 'jpg' },
+            'logos': { count: 17, path: 'assets/logos/', prefix: 'logo-', ext: 'png' },
+            'icons': { count: 20, path: 'assets/icons/', prefix: 'icon-', ext: 'png' },
+            'tattoo': { count: 8, path: 'assets/tattoo/', prefix: 'tattoo-', ext: 'jpg' },
+            'reels': { count: 21, path: 'assets/social-media-reels/', prefix: 'reel-', ext: 'mp4' },
+            'animations': { 
+                type: 'custom', 
+                path: 'assets/animation-videos/', 
+                data: [
+                    'a-warehouse-1.mp4',
+                    'a-warehouse-2.mp4',
+                    'a-warehouse-3.mp4',
+                    'motion-transation.mp4',
+                    'pujakarya-promo-video.mp4',
+                    'rrecruitee-animation-video.mp4'
+                ]
+            }
+        };
+
+        // State to track pagination for "All" category
+        let allCurrentStartIndex = 1;
+
+        function loadCategory(category, btn) {
+            // Update UI State
+            if (btn) {
+                document.querySelectorAll('.gallery-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+            }
+            
+            const loadMoreContainer = document.getElementById('load-more-container');
+            // Only clear grid if not loading more for "All"
+            if (category !== 'load-more-all') {
+                if (galleryGrid) galleryGrid.innerHTML = '';
+            }
+            
+            // Re-set column count reset not needed for pure CSS columns
+            if (category === 'all') allCurrentStartIndex = 1;
+
+            // Apply specific classes based on category type
+            if (category === 'all' || category === 'load-more-all') {
+                galleryGrid.classList.remove('grid-layout');
+                galleryGrid.classList.add('masonry-layout');
+            } else {
+                galleryGrid.classList.remove('masonry-layout');
+                galleryGrid.classList.add('grid-layout');
+            }
+
+            const createItem = (type, config, value, alt) => {
+                const div = document.createElement('div');
+                div.className = 'gallery-item hover-trigger';
+                
+                // Logic for Source Generation
+                let src = '';
+                if(type === 'custom') {
+                    src = `${config.path}${value}`;
+                } else {
+                    const prefix = config.prefix || '';
+                    const primaryExt = config.ext || 'jpg';
+                    src = `${config.path}${prefix}${value}.${primaryExt}`;
+                }
+
+                if(src.endsWith('.mp4')) {
+                    const video = document.createElement('video');
+                    video.src = src;
+                    video.controls = true;
+                    video.loop = true; 
+                    video.muted = true;
+                    video.loading = "lazy"; 
+                    video.addEventListener('mouseenter', () => video.play());
+                    video.addEventListener('mouseleave', () => video.pause());
+                    div.appendChild(video);
+                    return div;
+                }
+
+                const img = document.createElement('img');
+                img.loading = "lazy";
+                img.alt = alt;
+                img.classList.add('gallery-img');
+                img.onload = () => img.classList.add('loaded');
+                img.src = src;
+                
+                img.onerror = function() {
+                    // Fallback logic
+                    if (this.src.endsWith('.jpg')) this.src = this.src.replace('.jpg', '.png');
+                    else if (this.src.endsWith('.png')) this.src = this.src.replace('.png', '.jpg');
+                    else div.remove();
+                    this.onerror = () => div.remove();
+                };
+                
+                div.appendChild(img);
+                return div;
+            };
+
+            const renderBatch = (keys, startIndex, limit) => {
+                 keys.forEach(key => {
+                     const conf = galleryData[key];
+                     
+                     if (conf.type === 'custom') {
+                         const start = startIndex - 1;
+                         const end = limit === -1 ? conf.data.length : Math.min(start + limit, conf.data.length);
+                         for(let i=start; i<end; i++) {
+                             galleryGrid.appendChild(createItem('custom', conf, conf.data[i], `${key} work`));
+                         }
+                     } else {
+                         const start = startIndex;
+                         const end = limit === -1 ? conf.count : Math.min(startIndex + limit - 1, conf.count);
+                         for(let i=start; i<=end; i++) {
+                             galleryGrid.appendChild(createItem('sequence', conf, i, `${key} ${i}`));
+                         }
+                     }
+                 });
+            };
+
+            if(category === 'all' || category === 'load-more-all') {
+                const keys = Object.keys(galleryData);
+                // Load 2 items from each category (Updated from 3)
+                renderBatch(keys, allCurrentStartIndex, 2);
+                allCurrentStartIndex += 2;
+
+                if(loadMoreContainer) {
+                    loadMoreContainer.style.display = 'flex';
+                    const loadBtn = loadMoreContainer.querySelector('button');
+                    loadBtn.onclick = function() {
+                        loadCategory('load-more-all', null); 
+                    };
+                }
+            } else {
+                if(loadMoreContainer) loadMoreContainer.style.display = 'none';
+                const conf = galleryData[category];
+                // Render single category fully
+                renderBatch([category], 1, -1);
+            }
+            
+            setTimeout(attachHoverListeners, 100);
+        }
+
+        // --- UPDATED ANIMATION OBSERVER ---
+        const observerOptions = { threshold: 0.15 };
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => { 
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    if(entry.target.id === 'philosophy-text' && !entry.target.hasAttribute('data-split')) {
+                        const text = entry.target.innerText;
+                        entry.target.innerHTML = text.split(' ').map((word, i) => 
+                            `<span style="transition-delay: ${i * 100}ms">${word}&nbsp;</span>`
+                        ).join('');
+                        entry.target.setAttribute('data-split', 'true');
+                    }
+                } 
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.fade-in-up, .reveal-text').forEach(el => observer.observe(el));
+    </script>
+</body>
+</html>
